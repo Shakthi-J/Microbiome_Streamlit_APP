@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+tables/
+abundance_plots/
+abundance_plots_with_lines/
+heatmaps/
+input_taxonomy.txt
