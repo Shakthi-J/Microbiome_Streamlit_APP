@@ -1,8 +1,8 @@
 import streamlit as st
-import subprocess
 import os
 from pathlib import Path
 from PIL import Image
+
 import clean_input_microbiome_taxonomy
 import generate_all_abundance_plots
 import generate_all_abundance_plots_with_series_lines
@@ -31,6 +31,7 @@ st.info(
     "Development is ongoing to evolve it into a full-scale microbiome analysis platform, "
     "including AI-driven insights and advanced analytics."
 )
+
 # ======================================================
 # STEP 1: UPLOAD
 # ======================================================
@@ -60,10 +61,8 @@ st.caption(
 
 if st.button("Run Taxonomy Cleaning"):
     with st.spinner("Running taxonomy cleaning..."):
-        subprocess.run(
-            ["python", "clean_input_microbiome_taxonomy.py"],
-            check=True
-        )
+        clean_input_microbiome_taxonomy.main()
+
     st.success("Cleaning completed!")
 
     for level in LEVELS:
@@ -110,30 +109,22 @@ if st.button("Generate Abundance Plots"):
     with st.spinner("Generating abundance plots..."):
 
         if plot_mode == "Stacked bar plots":
-            script = "generate_all_abundance_plots.py"
+            generate_all_abundance_plots.main()
             output_folder = "abundance_plots"
-
         else:
-            script = "generate_all_abundance_plots_with_series_lines.py"
+            generate_all_abundance_plots_with_series_lines.main()
             output_folder = "abundance_plots_with_lines"
-
-        subprocess.run(
-            ["python", script],
-            check=True
-        )
 
     st.success("Abundance plots generated successfully!")
 
 # ======================================================
 # VIEW + DOWNLOAD PLOTS
 # ======================================================
-plot_dir = Path(output_folder) if 'output_folder' in locals() else None
+plot_dir = Path(output_folder) if "output_folder" in locals() else None
 
 if plot_dir and plot_dir.exists():
     st.subheader("📊 View Abundance Plots")
-    st.caption(
-        "Preview and download publication-ready abundance plots."
-    )
+    st.caption("Preview and download publication-ready abundance plots.")
 
     for img_path in sorted(plot_dir.glob("*.png")):
         st.image(img_path, caption=img_path.name, use_container_width=True)
@@ -158,10 +149,8 @@ HEATMAP_DIR.mkdir(exist_ok=True)
 
 if st.button("Generate Heatmaps"):
     with st.spinner("Generating heatmaps..."):
-        subprocess.run(
-            ["python", "generate_all_heatmaps.py"],
-            check=True
-        )
+        generate_all_heatmaps.main()
+
     st.success("✅ Heatmaps generated!")
 
 # ------------------------------------------------------
@@ -169,9 +158,7 @@ if st.button("Generate Heatmaps"):
 # ------------------------------------------------------
 if any(HEATMAP_DIR.glob("*.png")):
     st.subheader("🔥 View Heatmaps")
-    st.caption(
-        "High-resolution heatmaps highlighting dominant taxa distributions."
-    )
+    st.caption("High-resolution heatmaps highlighting dominant taxa distributions.")
 
     for img in sorted(HEATMAP_DIR.glob("*.png")):
         st.image(Image.open(img), caption=img.name, width="stretch")
@@ -183,7 +170,4 @@ if any(HEATMAP_DIR.glob("*.png")):
             )
 
 st.markdown("---")
-st.caption(
-    "Designed for fast, reproducible, and user-friendly microbiome analysis."
-)
-
+st.caption("Designed for fast, reproducible, and user-friendly microbiome analysis.")
