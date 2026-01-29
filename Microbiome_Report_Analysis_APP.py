@@ -256,7 +256,7 @@ if st.button("Clear all results and reset"):
             else:
                 path.unlink()
 
-    st.success("Previous analysis cleared. You can now upload a new file and rerun the pipeline.")
+    st.success("Previous analysis cleared. You can refresh the page, then upload a new file and rerun the pipeline.")
 
 
 st.markdown("---")
