@@ -1,20 +1,20 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import os
+from pathlib import Path
 
 # ================= CONFIG =================
 TOP_N = 10
-OUTPUT_DIR = "heatmaps"
+OUTPUT_DIR = Path("heatmaps")
 
 LEVEL_FILES = {
-    "Domain": "tables/domain_table.csv",
-    "Phylum": "tables/phylum_table.csv",
-    "Class": "tables/class_table.csv",
-    "Order": "tables/order_table.csv",
-    "Family": "tables/family_table.csv",
-    "Genus": "tables/genus_table.csv",
-    "Species": "tables/species_table.csv"
+    "Domain": Path("tables/domain_table.csv"),
+    "Phylum": Path("tables/phylum_table.csv"),
+    "Class": Path("tables/class_table.csv"),
+    "Order": Path("tables/order_table.csv"),
+    "Family": Path("tables/family_table.csv"),
+    "Genus": Path("tables/genus_table.csv"),
+    "Species": Path("tables/species_table.csv")
 }
 # =========================================
 
@@ -29,9 +29,11 @@ def plot_heatmap(df, level, output_png):
     df = df.sort_values("Total", ascending=False).head(TOP_N)
 
     # Convert to relative abundance (%)
-    df[sample_cols] = df[sample_cols].div(
-        df[sample_cols].sum(axis=0), axis=1
-    ) * 100
+    df[sample_cols] = (
+        df[sample_cols]
+        .div(df[sample_cols].sum(axis=0), axis=1)
+        * 100
+    )
 
     # Prepare matrix
     heatmap_df = df.set_index(level)[sample_cols]
@@ -50,33 +52,27 @@ def plot_heatmap(df, level, output_png):
     plt.xlabel("Samples")
     plt.ylabel(level)
     plt.tight_layout()
-    plt.savefig(output_png, dpi=300)
+    plt.savefig(output_png, dpi=300, bbox_inches="tight")
     plt.close()
 
 
 def main():
-    print("🔥 Generating heatmaps for all taxonomic levels...")
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    """
+    Generates heatmaps for the top 10 taxa
+    across all taxonomic levels.
+    """
 
-    for level, file in LEVEL_FILES.items():
-        if not os.path.exists(file):
-            print(f"⚠️ Skipping {level}: {file} not found")
+    OUTPUT_DIR.mkdir(exist_ok=True)
+
+    for level, file_path in LEVEL_FILES.items():
+        if not file_path.exists():
             continue
 
-        print(f"🔹 Processing {level}...")
-        df = pd.read_csv(file)
+        df = pd.read_csv(file_path)
 
-        output_png = os.path.join(
-            OUTPUT_DIR,
-            f"heatmap_{level.lower()}_top{TOP_N}.png"
-        )
-
+        output_png = OUTPUT_DIR / f"heatmap_{level.lower()}_top{TOP_N}.png"
         plot_heatmap(df, level, output_png)
-        print(f"✅ Saved {output_png}")
-
-    print("🎉 All heatmaps generated successfully!")
 
 
 if __name__ == "__main__":
     main()
-
