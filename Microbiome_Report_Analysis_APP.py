@@ -260,4 +260,4 @@ if st.button("Clear all results and reset"):
 
 
 st.markdown("---")
-st.caption("Designed for fast, reproducible, and user-friendly microbiome analysis.")
+st.caption("A small demo version designed for fast, reproducible, and user-friendly microbiome analysis by Shakthi J.")
