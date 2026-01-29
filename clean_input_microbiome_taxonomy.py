@@ -1,7 +1,20 @@
 import pandas as pd
+from pathlib import Path
 
-# ================= CONFIG =================
-INPUT_FILE = "input_taxonomy.txt"
+def main():
+    """
+    Cleans raw Kraken2-style taxonomy output
+    and generates abundance tables for each taxonomic level.
+    """
+
+    input_file = Path("input_taxonomy.txt")
+
+    if not input_file.exists():
+        raise FileNotFoundError("input_taxonomy.txt not found")
+
+    # 🔹 Example: load file
+    df = pd.read_csv(input_file, sep="\t", header=None)
+
 OUTPUT_CLEANED = "cleaned_taxonomy.csv"
 
 OUTPUT_PREFIX = "taxonomy_level_"
