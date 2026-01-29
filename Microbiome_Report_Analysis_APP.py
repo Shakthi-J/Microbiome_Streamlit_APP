@@ -3,6 +3,11 @@ import subprocess
 import os
 from pathlib import Path
 from PIL import Image
+import clean_input_microbiome_taxonomy
+import generate_all_abundance_plots
+import generate_all_abundance_plots_with_series_lines
+import generate_all_heatmaps
+
 
 # ================= CONFIG =================
 TABLE_DIR = Path("tables")
