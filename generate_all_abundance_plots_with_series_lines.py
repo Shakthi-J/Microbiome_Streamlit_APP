@@ -1,22 +1,21 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+from pathlib import Path
 
 # ================= CONFIG =================
 TOP_N = 10
-OUTPUT_DIR = "abundance_plots_with_lines"
+OUTPUT_DIR = Path("abundance_plots_with_lines")
 
 LEVEL_FILES = {
-    "Domain": "tables/domain_table.csv",
-    "Phylum": "tables/phylum_table.csv",
-    "Class": "tables/class_table.csv",
-    "Order": "tables/order_table.csv",
-    "Family": "tables/family_table.csv",
-    "Genus": "tables/genus_table.csv",
-    "Species": "tables/species_table.csv"
+    "Domain": Path("tables/domain_table.csv"),
+    "Phylum": Path("tables/phylum_table.csv"),
+    "Class": Path("tables/class_table.csv"),
+    "Order": Path("tables/order_table.csv"),
+    "Family": Path("tables/family_table.csv"),
+    "Genus": Path("tables/genus_table.csv"),
+    "Species": Path("tables/species_table.csv")
 }
-
 # =========================================
 
 # High-quality color palette
@@ -31,7 +30,7 @@ COLORS_20 = [
     (0.737, 0.741, 0.133, 1.0),
     (0.090, 0.745, 0.811, 1.0),
     (0.682, 0.780, 0.909, 1.0),
-    (0.498, 0.498, 0.498, 1.0)  # Others (gray)
+    (0.498, 0.498, 0.498, 1.0)  # Others
 ]
 
 # =========================================
@@ -65,9 +64,11 @@ def plot_stacked_bar_with_lines(df, level, output_png):
         .fillna(0)
     )
 
-    df_plot[sample_cols] = df_plot[sample_cols].div(
-        df_plot[sample_cols].sum(axis=0), axis=1
-    ) * 100
+    df_plot[sample_cols] = (
+        df_plot[sample_cols]
+        .div(df_plot[sample_cols].sum(axis=0), axis=1)
+        * 100
+    )
 
     # Legend labels
     total_sum = df_plot["Total"].sum()
@@ -130,34 +131,27 @@ def plot_stacked_bar_with_lines(df, level, output_png):
     )
 
     plt.tight_layout()
-    plt.savefig(output_png, dpi=300)
-    plt.close()
-
+    fig.savefig(output_png, dpi=300, bbox_inches="tight")
+    plt.close(fig)
 
 
 def main():
-    print("📊 Generating abundance plots (with series lines) for all taxonomic levels...")
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    """
+    Generates stacked bar plots with series lines
+    to visualize abundance trends across samples.
+    """
 
-    for level, file in LEVEL_FILES.items():
-        if not os.path.exists(file):
-            print(f"⚠️ Skipping {level}: {file} not found")
+    OUTPUT_DIR.mkdir(exist_ok=True)
+
+    for level, file_path in LEVEL_FILES.items():
+        if not file_path.exists():
             continue
 
-        print(f"🔹 Processing {level}...")
-        df = pd.read_csv(file)
+        df = pd.read_csv(file_path)
 
-        output_png = os.path.join(
-            OUTPUT_DIR,
-            f"top10_{level.lower()}_with_lines.png"
-        )
-
+        output_png = OUTPUT_DIR / f"top10_{level.lower()}_with_lines.png"
         plot_stacked_bar_with_lines(df, level, output_png)
-        print(f"✅ Saved {output_png}")
-
-    print("🎉 All plots generated successfully!")
 
 
 if __name__ == "__main__":
     main()
-
