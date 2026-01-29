@@ -1,23 +1,9 @@
 import pandas as pd
 from pathlib import Path
 
-def main():
-    """
-    Cleans raw Kraken2-style taxonomy output
-    and generates abundance tables for each taxonomic level.
-    """
-
-    input_file = Path("input_taxonomy.txt")
-
-    if not input_file.exists():
-        raise FileNotFoundError("input_taxonomy.txt not found")
-
-    # 🔹 Example: load file
-    df = pd.read_csv(input_file, sep="\t", header=None)
-
+# ================= CONFIG =================
+INPUT_FILE = Path("input_taxonomy.txt")
 OUTPUT_CLEANED = "cleaned_taxonomy.csv"
-
-OUTPUT_PREFIX = "taxonomy_level_"
 
 TAX_LEVELS = ["Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species"]
 
@@ -100,25 +86,32 @@ def create_level_tables(df):
         output_file = f"{level.lower()}_table.csv"
         level_df.to_csv(output_file, index=False)
 
-        print(f"📄 Created {output_file}")
-
 
 def main():
-    print("📥 Reading input file...")
+    """
+    Cleans raw Kraken2-style taxonomy output
+    and generates abundance tables for each taxonomic level.
+    """
+
+    if not INPUT_FILE.exists():
+        raise FileNotFoundError("input_taxonomy.txt not found")
+
+    # 🔹 Load input
     raw_df = pd.read_csv(INPUT_FILE, sep="\t")
 
-    print("🧹 Cleaning taxonomy...")
+    # 🔹 Expect taxonomy column to be named 'Taxon'
+    if "Taxon" not in raw_df.columns:
+        raw_df.columns = ["Taxon"] + list(raw_df.columns[1:])
+
+    # 🔹 Clean taxonomy
     cleaned_df = clean_taxonomy_table(raw_df)
 
-    print("💾 Saving cleaned full table...")
+    # 🔹 Save full cleaned table
     cleaned_df.to_csv(OUTPUT_CLEANED, index=False)
 
-    print("📊 Creating taxonomic-level tables...")
+    # 🔹 Generate level-wise tables
     create_level_tables(cleaned_df)
-
-    print("✅ All files generated successfully!")
 
 
 if __name__ == "__main__":
     main()
-
