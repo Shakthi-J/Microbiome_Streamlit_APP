@@ -169,5 +169,95 @@ if any(HEATMAP_DIR.glob("*.png")):
                 file_name=img.name
             )
 
+# ======================================================
+# DOWNLOAD ALL RESULTS
+# ======================================================
+import zipfile
+import io
+
+st.markdown("---")
+st.subheader("⬇️ Download Analysis Results")
+
+st.caption(
+    "Download all generated tables, plots, and cleaned files as a single ZIP archive."
+)
+
+def collect_result_files():
+    files = []
+
+    folders = [
+        Path("tables"),
+        Path("abundance_plots"),
+        Path("abundance_plots_with_lines"),
+        Path("heatmaps"),
+    ]
+
+    for folder in folders:
+        if folder.exists():
+            files.extend(folder.glob("*"))
+
+    extra_files = [
+        Path("cleaned_taxonomy.csv"),
+        Path("input_taxonomy.txt"),
+    ]
+
+    for f in extra_files:
+        if f.exists():
+            files.append(f)
+
+    return files
+
+
+result_files = collect_result_files()
+
+if result_files:
+    zip_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for file in result_files:
+            zipf.write(file, arcname=file.as_posix())
+
+    zip_buffer.seek(0)
+
+    st.download_button(
+        label="📦 Download all results (ZIP)",
+        data=zip_buffer,
+        file_name="microbiome_analysis_results.zip",
+        mime="application/zip"
+    )
+else:
+    st.info("No results available yet. Run the analysis to enable download.")
+
+# ======================================================
+# CLEAR PREVIOUS RUN
+# ======================================================
+st.markdown("---")
+st.subheader("🧹 Clear Previous Analysis")
+
+st.caption(
+    "Remove all generated tables, plots, and uploaded files to start a fresh analysis run."
+)
+
+if st.button("Clear all results and reset"):
+    paths_to_clear = [
+        Path("tables"),
+        Path("abundance_plots"),
+        Path("abundance_plots_with_lines"),
+        Path("heatmaps"),
+        Path("input_taxonomy.txt"),
+        Path("cleaned_taxonomy.csv")
+    ]
+
+    for path in paths_to_clear:
+        if path.exists():
+            if path.is_dir():
+                for f in path.glob("*"):
+                    f.unlink()
+            else:
+                path.unlink()
+
+    st.success("Previous analysis cleared. You can now upload a new file and rerun the pipeline.")
+
+
 st.markdown("---")
 st.caption("Designed for fast, reproducible, and user-friendly microbiome analysis.")
