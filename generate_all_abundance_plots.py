@@ -1,20 +1,20 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from pathlib import Path
 import numpy as np
-import os
 
 # ================= CONFIG =================
 TOP_N = 10
-OUTPUT_DIR = "abundance_plots"
+OUTPUT_DIR = Path("abundance_plots")
 
 LEVEL_FILES = {
-    "Domain": "tables/domain_table.csv",
-    "Phylum": "tables/phylum_table.csv",
-    "Class": "tables/class_table.csv",
-    "Order": "tables/order_table.csv",
-    "Family": "tables/family_table.csv",
-    "Genus": "tables/genus_table.csv",
-    "Species": "tables/species_table.csv"
+    "Domain": Path("tables/domain_table.csv"),
+    "Phylum": Path("tables/phylum_table.csv"),
+    "Class": Path("tables/class_table.csv"),
+    "Order": Path("tables/order_table.csv"),
+    "Family": Path("tables/family_table.csv"),
+    "Genus": Path("tables/genus_table.csv"),
+    "Species": Path("tables/species_table.csv")
 }
 # =========================================
 
@@ -30,7 +30,7 @@ COLORS_20 = [
     (0.737, 0.741, 0.133, 1.0),
     (0.090, 0.745, 0.811, 1.0),
     (0.682, 0.780, 0.909, 1.0),
-    (0.498, 0.498, 0.498, 1.0)  # Others (gray)
+    (0.498, 0.498, 0.498, 1.0)  # Others
 ]
 
 # =========================================
@@ -55,9 +55,11 @@ def plot_top10_stacked(df, level):
     df_plot = pd.concat([df_top, others_row], ignore_index=True)
 
     # Convert to relative abundance
-    df_plot[sample_cols] = df_plot[sample_cols].div(
-        df_plot[sample_cols].sum(axis=0), axis=1
-    ) * 100
+    df_plot[sample_cols] = (
+        df_plot[sample_cols]
+        .div(df_plot[sample_cols].sum(axis=0), axis=1)
+        * 100
+    )
 
     # Legend labels
     total_sum = df_plot["Total"].sum()
@@ -98,29 +100,24 @@ def plot_top10_stacked(df, level):
 
 
 def main():
-    print("📊 Generating abundance plots for all taxonomic levels...")
+    """
+    Generates stacked bar plots for the top 10 taxa
+    across all taxonomic levels.
+    """
 
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    OUTPUT_DIR.mkdir(exist_ok=True)
 
-    for level, file in LEVEL_FILES.items():
-        if not os.path.exists(file):
-            print(f"⚠️ Skipping {level}: {file} not found")
+    for level, file_path in LEVEL_FILES.items():
+        if not file_path.exists():
             continue
 
-        print(f"🔹 Processing {level}...")
-        df = pd.read_csv(file)
-
+        df = pd.read_csv(file_path)
         fig = plot_top10_stacked(df, level)
 
-        output_path = os.path.join(OUTPUT_DIR, f"top10_{level.lower()}.png")
-        fig.savefig(output_path, dpi=300)
+        output_path = OUTPUT_DIR / f"top10_{level.lower()}.png"
+        fig.savefig(output_path, dpi=300, bbox_inches="tight")
         plt.close(fig)
-
-        print(f"✅ Saved {output_path}")
-
-    print("🎉 All abundance plots generated successfully!")
 
 
 if __name__ == "__main__":
     main()
-
