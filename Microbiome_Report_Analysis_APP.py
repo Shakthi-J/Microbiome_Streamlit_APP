@@ -37,7 +37,7 @@ st.info(
 # ======================================================
 st.header("1️⃣ Upload Taxonomy File")
 st.caption(
-    "Upload a Kraken2-style taxonomy report (.txt) to initiate downstream microbiome analysis. NOTE - You can download the example input file from (Microbiome_Streamlit_APP/sample_input_example/input_taxonomy.txt"
+    "Upload a Kraken2-style taxonomy report (.txt) to initiate downstream microbiome analysis. (NOTE - You can download the example input file from (Github - Microbiome_Streamlit_APP/sample_input_example/input_taxonomy.txt))"
 )
 
 uploaded_file = st.file_uploader(
